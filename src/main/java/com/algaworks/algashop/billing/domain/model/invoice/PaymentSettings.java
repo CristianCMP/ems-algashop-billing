@@ -1,8 +1,11 @@
 package com.algaworks.algashop.billing.domain.model.invoice;
 
+import com.algaworks.algashop.billing.domain.model.DomainException;
 import com.algaworks.algashop.billing.domain.model.IdGenerator;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter(AccessLevel.PRIVATE)
@@ -18,7 +21,13 @@ public class PaymentSettings {
     private String gatewayCode;
     private PaymentMethod method;
 
-    public static PaymentSettings brandNew(PaymentMethod method, UUID creditCardId) {
+    static PaymentSettings brandNew(PaymentMethod method, UUID creditCardId) {
+        Objects.requireNonNull(method, "method must not be null");
+
+        if (method.equals(PaymentMethod.CREDIT_CARD)) {
+            Objects.requireNonNull(creditCardId, "creditCardId must not be null");
+        }
+
         return new PaymentSettings(
                 IdGenerator.generateTimeBasedUUID(),
                 creditCardId,
@@ -28,6 +37,12 @@ public class PaymentSettings {
     }
 
     void assignGatewayCode(String gatewayCode) {
+        if (StringUtils.isBlank(gatewayCode)) {
+            throw new IllegalArgumentException("Gateway code cannot be blank");
+        }
+        if (this.getGatewayCode() != null) {
+            throw new DomainException("Gateway code already assigned");
+        }
         setGatewayCode(gatewayCode);
     }
 }
