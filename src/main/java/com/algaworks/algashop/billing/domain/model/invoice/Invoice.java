@@ -73,8 +73,8 @@ public class Invoice {
         );
     }
 
-    public Set<LineItem> items() {
-        return Collections.unmodifiableSet(items);
+    public Set<LineItem> getItems() {
+        return Collections.unmodifiableSet(this.items);
     }
 
     public boolean isCanceled() {
