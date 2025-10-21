@@ -1,6 +1,6 @@
 package com.algaworks.algashop.billing.domain.model.invoice;
 
-import com.algaworks.algashop.billing.domain.model.AbstractAuditableEntity;
+import com.algaworks.algashop.billing.domain.model.AbstractAuditableAggregateRoot;
 import com.algaworks.algashop.billing.domain.model.DomainException;
 import com.algaworks.algashop.billing.domain.model.IdGenerator;
 import jakarta.persistence.*;
@@ -13,11 +13,11 @@ import java.util.*;
 
 @Setter(AccessLevel.PRIVATE)
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true,callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Invoice extends AbstractAuditableEntity {
+public class Invoice extends AbstractAuditableAggregateRoot<Invoice> {
 
     @Id
     @EqualsAndHashCode.Include
@@ -35,11 +35,12 @@ public class Invoice extends AbstractAuditableEntity {
     @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private PaymentSettings paymentSettings;
 
     @ElementCollection
-    @CollectionTable(name = "invoice_line_item",joinColumns = @JoinColumn(name = "invoice_id"))
+    @CollectionTable(name = "invoice_line_item",
+            joinColumns = @JoinColumn(name = "invoice_id"))
     private Set<LineItem> items = new HashSet<>();
 
     @Embedded
@@ -51,21 +52,22 @@ public class Invoice extends AbstractAuditableEntity {
                                 UUID customerId,
                                 Payer payer,
                                 Set<LineItem> items) {
-        Objects.requireNonNull(customerId, "customerId cannot be null");
-        Objects.requireNonNull(payer, "payer cannot be null");
-        Objects.requireNonNull(items, "items cannot be null");
+        Objects.requireNonNull(customerId);
+        Objects.requireNonNull(payer);
+        Objects.requireNonNull(items);
 
-        if (StringUtils.isEmpty(orderId)) {
-            throw new IllegalArgumentException("orderId cannot be empty");
+        if (StringUtils.isBlank(orderId)) {
+            throw new IllegalArgumentException();
         }
 
         if (items.isEmpty()) {
-            throw new IllegalArgumentException("items cannot be empty");
+            throw new IllegalArgumentException();
         }
 
-        BigDecimal totalAmount = items.stream().map(LineItem::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAmount = items.stream().map(LineItem::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new Invoice(
+        Invoice invoice = new Invoice(
                 IdGenerator.generateTimeBasedUUID(),
                 orderId,
                 customerId,
@@ -80,6 +82,9 @@ public class Invoice extends AbstractAuditableEntity {
                 payer,
                 null
         );
+        invoice.registerEvent(new InvoiceIssuedEvent(invoice.getId(),
+                invoice.getCustomerId(), invoice.getOrderId(), invoice.getIssuedAt()));
+        return invoice;
     }
 
     public Set<LineItem> getItems() {
@@ -100,31 +105,36 @@ public class Invoice extends AbstractAuditableEntity {
 
     public void markAsPaid() {
         if (!isUnpaid()) {
-            throw new DomainException(String.format("Invoice %s with status %s cannot be marked as paid", this.getId(), this.getStatus().toString().toLowerCase()));
+            throw new DomainException(String.format("Invoice %s with status %s cannot be marked as paid",
+                    this.getId(), this.getStatus().toString().toLowerCase()));
         }
         setPaidAt(OffsetDateTime.now());
         setStatus(InvoiceStatus.PAID);
+        registerEvent(new InvoicePaidEvent(this.getId(), this.getCustomerId(), this.getOrderId(), this.getPaidAt()));
     }
 
     public void cancel(String cancelReason) {
         if (isCanceled()) {
-            throw new DomainException(String.format("Invoice %s is ready canceled", this.getId()));
+            throw new DomainException(String.format("Invoice %s is already canceled", this.getId()));
         }
         setCancelReason(cancelReason);
         setCanceledAt(OffsetDateTime.now());
         setStatus(InvoiceStatus.CANCELED);
+        registerEvent(new InvoiceCanceledEvent(this.getId(), this.getCustomerId(), this.getOrderId(), this.getCanceledAt()));
     }
 
     public void assignPaymentGatewayCode(String code) {
         if (!isUnpaid()) {
-            throw new DomainException(String.format("Invoice %s with status %s cannot be edited", this.getId(), this.getStatus().toString().toLowerCase()));
+            throw new DomainException(String.format("Invoice %s with status %s cannot be edited",
+                    this.getId(), this.getStatus().toString().toLowerCase()));
         }
         this.getPaymentSettings().assignGatewayCode(code);
     }
 
     public void changePaymentSettings(PaymentMethod method, UUID creditCardId) {
         if (!isUnpaid()) {
-            throw new DomainException(String.format("Invoice %s with status %s cannot be edited", this.getId(), this.getStatus().toString().toLowerCase()));
+            throw new DomainException(String.format("Invoice %s with status %s cannot be edited",
+                    this.getId(), this.getStatus().toString().toLowerCase()));
         }
         PaymentSettings paymentSettings = PaymentSettings.brandNew(method, creditCardId);
         paymentSettings.setInvoice(this);
