@@ -97,6 +97,32 @@ class InvoiceManagementApplicationServiceIT {
     }
 
     @Test
+    public void shouldProcessInvoicePayment() {
+        Invoice invoice = InvoiceTestDataBuilder.anInvoice().build();
+        invoice.changePaymentSettings(PaymentMethod.GATEWAY_BALANCE, null);
+        invoiceRepository.saveAndFlush(invoice);
+
+        Payment payment = Payment.builder()
+                .gatewayCode("12345")
+                .invoiceId(invoice.getId())
+                .method(invoice.getPaymentSettings().getMethod())
+                .status(PaymentStatus.PAID)
+                .build();
+        Mockito.when(paymentGatewayService.capture(Mockito.any(PaymentRequest.class))).thenReturn(payment);
+
+        applicationService.processPayment(invoice.getId());
+
+        Invoice paidInvoice = invoiceRepository.findById(invoice.getId()).orElseThrow();
+
+        Assertions.assertThat(paidInvoice.isPaid()).isTrue();
+
+        Mockito.verify(paymentGatewayService).capture(Mockito.any(PaymentRequest.class));
+        Mockito.verify(invoicingService).assignPayment(Mockito.any(Invoice.class), Mockito.any(Payment.class));
+
+        Mockito.verify(invoiceEventListener).listen(Mockito.any(InvoicePaidEvent.class));
+    }
+
+    @Test
     public void shouldProcessInvoicePaymentAndCancelInvoice() {
         Invoice invoice = InvoiceTestDataBuilder.anInvoice().build();
         invoice.changePaymentSettings(PaymentMethod.GATEWAY_BALANCE, null);
@@ -108,6 +134,7 @@ class InvoiceManagementApplicationServiceIT {
                 .method(invoice.getPaymentSettings().getMethod())
                 .status(PaymentStatus.FAILED)
                 .build();
+
         Mockito.when(paymentGatewayService.capture(Mockito.any(PaymentRequest.class))).thenReturn(payment);
 
         applicationService.processPayment(invoice.getId());
