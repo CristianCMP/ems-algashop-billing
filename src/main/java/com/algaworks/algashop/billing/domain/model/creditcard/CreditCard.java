@@ -1,4 +1,4 @@
-package com.algaworks.algashop.billing.domain.model.credicard;
+package com.algaworks.algashop.billing.domain.model.creditcard;
 
 import com.algaworks.algashop.billing.domain.model.IdGenerator;
 import jakarta.persistence.Entity;
