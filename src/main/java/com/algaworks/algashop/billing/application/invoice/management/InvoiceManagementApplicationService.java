@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,16 +22,17 @@ import java.util.UUID;
 public class InvoiceManagementApplicationService {
 
     private final PaymentGatewayService paymentGatewayService;
-    private final InvoiceRepository invoiceRepository;
     private final InvoicingService invoicingService;
+    private final InvoiceRepository invoiceRepository;
     private final CreditCardRepository creditCardRepository;
 
+    @Transactional
     public UUID generate(GenerateInvoiceInput input) {
         PaymentSettingsInput paymentSettings = input.getPaymentSettings();
-        verifyCreditCardId(paymentSettings.getCreditCardId(), input.getCustomerId());
+        verifyCreditCardId(paymentSettings.getCreditCardId());
 
         Payer payer = convertToPayer(input.getPayer());
-        Set<LineItem> items = convertToLineItem(input.getItems());
+        Set<LineItem> items = convertToLineItems(input.getItems());
 
         Invoice invoice = invoicingService.issue(input.getOrderId(), input.getCustomerId(), payer, items);
         invoice.changePaymentSettings(paymentSettings.getMethod(), paymentSettings.getCreditCardId());
@@ -42,7 +44,7 @@ public class InvoiceManagementApplicationService {
 
     @Transactional
     public void processPayment(UUID invoiceId) {
-        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(InvoiceNotFoundException::new);
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException());
         PaymentRequest paymentRequest = toPaymentRequest(invoice);
 
         Payment payment;
@@ -70,7 +72,7 @@ public class InvoiceManagementApplicationService {
                 .build();
     }
 
-    private Set<LineItem> convertToLineItem(Set<LineItemInput> itemsInput) {
+    private Set<LineItem> convertToLineItems(List<LineItemInput> itemsInput) {
         Set<LineItem> lineItems = new LinkedHashSet<>();
         int itemNumber = 1;
         for (LineItemInput itemInput : itemsInput) {
@@ -104,8 +106,8 @@ public class InvoiceManagementApplicationService {
                 .build();
     }
 
-    private void verifyCreditCardId(UUID creditCardId, UUID customerId) {
-        if (creditCardId != null && !creditCardRepository.existsByIdAndCustomerId(creditCardId, customerId)) {
+    private void verifyCreditCardId(UUID creditCardId) {
+        if (creditCardId != null && !creditCardRepository.existsById(creditCardId)) {
             throw new CreditCardNotFoundException();
         }
     }
