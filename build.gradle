@@ -49,16 +49,16 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
-	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	testImplementation 'org.wiremock:wiremock-standalone:3.13.1'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	mockitoAgent('org.mockito:mockito-core:5.14.2') {transitive = false}
 }
@@ -98,4 +98,17 @@ tasks.register('integrationTest', Test) {
 		includeTestsMatching "*IT"
 		excludeTestsMatching "*Test"
 	}
+}
+
+bootJar {
+	archiveFileName = 'billing.jar'
+}
+
+tasks.register('dockerBuild', Exec) {
+	description = 'Builds a multi-platform Docker image using Buildx'
+	group = 'build'
+	dependsOn('bootJar')
+	workingDir project.rootDir
+	commandLine 'docker', 'buildx', 'build', '--platform', 'linux/arm64/v8,linux/amd64',
+			'--tag', 'algashop/billing:dev', '.'
 }
