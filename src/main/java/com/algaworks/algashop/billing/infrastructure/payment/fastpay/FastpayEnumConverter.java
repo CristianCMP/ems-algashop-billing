@@ -1,9 +1,7 @@
-package com.algaworks.algashop.billing.infrastructure.creditcard.fastpay;
+package com.algaworks.algashop.billing.infrastructure.payment.fastpay;
 
 import com.algaworks.algashop.billing.domain.model.invoice.PaymentMethod;
 import com.algaworks.algashop.billing.domain.model.invoice.payment.PaymentStatus;
-import com.algaworks.algashop.billing.infrastructure.payment.fastpay.FastpayPaymentMethod;
-import com.algaworks.algashop.billing.infrastructure.payment.fastpay.FastpayPaymentStatus;
 
 public class FastpayEnumConverter {
 

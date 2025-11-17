@@ -8,7 +8,6 @@ import com.algaworks.algashop.billing.domain.model.invoice.Payer;
 import com.algaworks.algashop.billing.domain.model.invoice.payment.Payment;
 import com.algaworks.algashop.billing.domain.model.invoice.payment.PaymentGatewayService;
 import com.algaworks.algashop.billing.domain.model.invoice.payment.PaymentRequest;
-import com.algaworks.algashop.billing.infrastructure.creditcard.fastpay.FastpayEnumConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @Service
 @ConditionalOnProperty(name = "algashop.integrations.payment.provider", havingValue = "FASTPAY")
 @RequiredArgsConstructor
-public class PaymentGatewayFastpayImpl implements PaymentGatewayService {
+public class PaymentGatewayServiceFastpayImpl implements PaymentGatewayService {
 
     private final FastpayPaymentAPIClient fastpayPaymentAPIClient;
     private final CreditCardRepository creditCardRepository;
@@ -55,7 +54,7 @@ public class PaymentGatewayFastpayImpl implements PaymentGatewayService {
             case CREDIT_CARD -> {
                 builder.method(FastpayPaymentMethod.CREDIT.name());
                 CreditCard creditCard = creditCardRepository.findById(request.getCreditCardId())
-                        .orElseThrow(CreditCardNotFoundException::new);
+                        .orElseThrow(() -> new CreditCardNotFoundException());
                 builder.creditCardId(creditCard.getGatewayCode());
             }
             case GATEWAY_BALANCE -> builder.method(FastpayPaymentMethod.GATEWAY_BALANCE.name());
