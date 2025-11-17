@@ -25,4 +25,5 @@ public class InvoicingService {
         invoice.assignPaymentGatewayCode(payment.getGatewayCode());
         invoice.updatePaymentStatus(payment.getStatus());
     }
+
 }

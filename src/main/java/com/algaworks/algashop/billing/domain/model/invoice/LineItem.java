@@ -24,11 +24,11 @@ public class LineItem {
         Objects.requireNonNull(amount);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            throw new IllegalArgumentException();
         }
 
-        if(number <= 0) {
-            throw new IllegalArgumentException("Number must be positive");
+        if (number <= 0) {
+            throw new IllegalArgumentException();
         }
 
         this.number = number;

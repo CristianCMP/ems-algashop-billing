@@ -32,12 +32,10 @@ public class PaymentSettings {
     private Invoice invoice;
 
     static PaymentSettings brandNew(PaymentMethod method, UUID creditCardId) {
-        Objects.requireNonNull(method, "method must not be null");
-
+        Objects.requireNonNull(method);
         if (method.equals(PaymentMethod.CREDIT_CARD)) {
-            Objects.requireNonNull(creditCardId, "creditCardId must not be null");
+            Objects.requireNonNull(creditCardId);
         }
-
         return new PaymentSettings(
                 IdGenerator.generateTimeBasedUUID(),
                 creditCardId,
@@ -49,7 +47,7 @@ public class PaymentSettings {
 
     void assignGatewayCode(String gatewayCode) {
         if (StringUtils.isBlank(gatewayCode)) {
-            throw new IllegalArgumentException("Gateway code cannot be blank");
+            throw new IllegalArgumentException();
         }
         if (this.getGatewayCode() != null) {
             throw new DomainException("Gateway code already assigned");

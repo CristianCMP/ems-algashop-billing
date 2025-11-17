@@ -16,7 +16,7 @@ public class DomainException extends RuntimeException {
         super(cause);
     }
 
-    protected DomainException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public DomainException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

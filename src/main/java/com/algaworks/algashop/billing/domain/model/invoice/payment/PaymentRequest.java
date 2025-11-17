@@ -20,7 +20,9 @@ public class PaymentRequest {
     private UUID creditCardId;
     private Payer payer;
 
-    public PaymentRequest(PaymentMethod method, BigDecimal amount, UUID invoiceId, UUID creditCardId, Payer payer) {
+    public PaymentRequest(PaymentMethod method,
+                          BigDecimal amount, UUID invoiceId,
+                          UUID creditCardId, Payer payer) {
         Objects.requireNonNull(method);
         Objects.requireNonNull(amount);
         Objects.requireNonNull(invoiceId);

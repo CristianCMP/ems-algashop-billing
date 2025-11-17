@@ -33,7 +33,7 @@ public class CreditCardProviderServiceFastpayImpl implements CreditCardProviderS
         FastpayCreditCardResponse response;
         try {
             response = fastpayCreditCardAPIClient.findById(gatewayCode);
-        } catch (HttpClientErrorException.NotFound ex) {
+        } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();
         }
         return Optional.of(toLimitedCreditCard(response));
