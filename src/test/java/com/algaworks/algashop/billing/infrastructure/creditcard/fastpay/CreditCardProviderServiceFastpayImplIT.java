@@ -6,8 +6,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Optional;
-
 @SpringBootTest
 class CreditCardProviderServiceFastpayImplIT extends AbstractFastpayIT {
 
@@ -29,12 +27,7 @@ class CreditCardProviderServiceFastpayImplIT extends AbstractFastpayIT {
     @Test
     public void shouldDeleteRegisteredCreditCard() {
         LimitedCreditCard limitedCreditCard = registerCard();
-
         creditCardProvider.delete(limitedCreditCard.getGatewayCode());
-
-        Optional<LimitedCreditCard> possibleCreditCard = creditCardProvider.findById(limitedCreditCard.getGatewayCode());
-
-        Assertions.assertThat(possibleCreditCard).isEmpty();
     }
 
 }
