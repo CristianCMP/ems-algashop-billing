@@ -2,6 +2,7 @@ package com.algaworks.algashop.billing.infrastructure;
 
 import com.algaworks.algashop.billing.domain.model.creditcard.LimitedCreditCard;
 import com.algaworks.algashop.billing.infrastructure.creditcard.fastpay.*;
+import com.algaworks.algashop.billing.utils.TestcontainerPostgreSQLConfig;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.ClasspathFileSource;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
-@Import(FastpayCreditCardTokenizationAPIClientConfig.class)
+@Import({FastpayCreditCardTokenizationAPIClientConfig.class, TestcontainerPostgreSQLConfig.class})
 public abstract class AbstractFastpayIT {
 
     @Autowired
@@ -34,7 +35,7 @@ public abstract class AbstractFastpayIT {
                 .port(8788)
                 .usingFilesUnderDirectory("src/test/resources/wiremock/fastpay")
                 .extensions(new ResponseTemplateTransformer(
-                        TemplateEngine.defaultTemplateEngine(),
+                       TemplateEngine.defaultTemplateEngine(),
                         true,
                         new ClasspathFileSource("src/test/resources/wiremock/fastpay"),
                         Collections.emptyList()
