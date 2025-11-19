@@ -49,6 +49,7 @@ class InvoiceManagementApplicationServiceIT extends AbstractApplicationIT {
 
         GenerateInvoiceInput input = GenerateInvoiceInputTestDataBuilder.anInput().build();
 
+        input.setCustomerId(customerId);
         input.setPaymentSettings(
                 PaymentSettingsInput.builder()
                         .creditCardId(creditCard.getId())

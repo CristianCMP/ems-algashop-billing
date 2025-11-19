@@ -39,5 +39,4 @@ public class CreditCardManagementService {
         creditCardRepository.delete(creditCard);
         creditCardProviderService.delete(creditCard.getGatewayCode());
     }
-
 }

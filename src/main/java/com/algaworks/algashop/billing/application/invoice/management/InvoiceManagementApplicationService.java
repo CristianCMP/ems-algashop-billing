@@ -95,9 +95,9 @@ public class InvoiceManagementApplicationService {
         int itemNumber = 1;
         for (LineItemInput itemInput : itemsInput) {
             lineItems.add(LineItem.builder()
-                    .number(itemNumber)
-                    .name(itemInput.getName())
-                    .amount(itemInput.getAmount())
+                            .number(itemNumber)
+                            .name(itemInput.getName())
+                            .amount(itemInput.getAmount())
                     .build());
             itemNumber++;
         }

@@ -35,9 +35,9 @@ public class CreditCard {
                                       Integer expMonth,
                                       Integer expYear,
                                       String gatewayCreditCardCode) {
-        Objects.requireNonNull(customerId, "customerId cannot be null");
-        Objects.requireNonNull(expMonth, "expMonth cannot be null");
-        Objects.requireNonNull(expYear, "expYear cannot be null");
+        Objects.requireNonNull(customerId);
+        Objects.requireNonNull(expMonth);
+        Objects.requireNonNull(expYear);
 
         if (StringUtils.isAnyBlank(lastNumbers, brand, gatewayCreditCardCode)) {
             throw new IllegalArgumentException();
@@ -57,7 +57,7 @@ public class CreditCard {
 
     public void setGatewayCode(String gatewayCode) {
         if (StringUtils.isBlank(gatewayCode)) {
-            throw new IllegalArgumentException("gatewayCode cannot be blank");
+            throw new IllegalArgumentException();
         }
         this.gatewayCode = gatewayCode;
     }

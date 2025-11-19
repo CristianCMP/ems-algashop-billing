@@ -15,11 +15,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LineItemInput {
-    @NotBlank
-    private String name;
-    @NotNull
-    private BigDecimal amount;
-    @NotNull
-    @Positive
-    private Integer quantity;
+	@NotBlank
+	private String name;
+	@NotNull
+	private BigDecimal amount;
+	@NotNull
+	@Positive
+	private Integer quantity;
 }

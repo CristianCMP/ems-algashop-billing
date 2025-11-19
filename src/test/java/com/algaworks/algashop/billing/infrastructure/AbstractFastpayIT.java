@@ -35,7 +35,7 @@ public abstract class AbstractFastpayIT {
                 .port(8788)
                 .usingFilesUnderDirectory("src/test/resources/wiremock/fastpay")
                 .extensions(new ResponseTemplateTransformer(
-                       TemplateEngine.defaultTemplateEngine(),
+                        TemplateEngine.defaultTemplateEngine(),
                         true,
                         new ClasspathFileSource("src/test/resources/wiremock/fastpay"),
                         Collections.emptyList()
