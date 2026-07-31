@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static com.algaworks.algashop.billing.infrastructure.security.SecurityAnnotations.CanReadInvoices;
+import static com.algaworks.algashop.billing.infrastructure.security.SecurityAnnotations.CanWriteInvoices;
+
 @RestController
 @RequestMapping("/api/v1/orders/{orderId}/invoice")
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class InvoiceController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @CanWriteInvoices
     public InvoiceOutput generate(@PathVariable String orderId, @Valid @RequestBody GenerateInvoiceInput input) {
         input.setOrderId(orderId);
         UUID invoiceId = invoiceManagementApplicationService.generate(input);
@@ -35,6 +39,7 @@ public class InvoiceController {
     }
 
     @GetMapping
+    @CanReadInvoices
     public InvoiceOutput findByOrder(@PathVariable String orderId) {
         return invoiceQueryService.findByOrderId(orderId);
     }
