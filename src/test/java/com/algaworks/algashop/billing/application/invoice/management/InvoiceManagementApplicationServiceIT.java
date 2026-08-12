@@ -43,6 +43,9 @@ class InvoiceManagementApplicationServiceIT extends AbstractApplicationIT {
 
     @Test
     public void shouldGenerateInvoiceWithCreditCardAsPayment() {
+        Mockito.when(securityChecks.getAuthenticatedUserId()).thenReturn(UUID.randomUUID());
+        Mockito.when(securityChecks.isAuthenticated()).thenReturn(true);
+
         UUID customerId = UUID.randomUUID();
         CreditCard creditCard = CreditCardTestDataBuilder.aCreditCard().customerId(customerId).build();
         creditCardRepository.saveAndFlush(creditCard);
@@ -66,6 +69,7 @@ class InvoiceManagementApplicationServiceIT extends AbstractApplicationIT {
         Assertions.assertThat(invoice.getVersion()).isEqualTo(0L);
         Assertions.assertThat(invoice.getCreatedAt()).isNotNull();
         Assertions.assertThat(invoice.getCreatedByUserId()).isNotNull();
+
 
         Mockito.verify(invoicingService).issue(any(), any(), any(), any());
 
